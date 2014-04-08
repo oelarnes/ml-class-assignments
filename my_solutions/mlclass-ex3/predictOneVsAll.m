@@ -5,7 +5,7 @@ function p = predictOneVsAll(all_theta, X)
 %   threshold at 0.5 (i.e., if sigmoid(all_theta'*x) >= 0.5, predict 1)
 
 m = size(X, 1);
-num_labels = size(all_theta, 2);
+num_labels = size(all_theta, 1);
 
 % You need to return the following variables correctly 
 p = zeros(size(X, 1), 1);
@@ -26,7 +26,8 @@ X = [ones(m, 1) X];
 %       for each row.
 %       
 
-
+[x ix] = max(sigmoid(all_theta*X'));
+p = ix';
 
 
 

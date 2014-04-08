@@ -6,7 +6,7 @@ function [J, grad] = lrCostFunction(theta, X, y, lambda)
 %   gradient of the cost w.r.t. to the parameters. 
 
 % Initialize some useful values
-m = length(y); % number of training examples
+m = size(y, 2); % number of training examples
 
 % You need to return the following variables correctly 
 J = 0;
@@ -36,14 +36,25 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
+%   Our solution is somewhat different from what is asked for. We fully vectorize.
+%   Theta is a vector form of the K x n+1 (here n) matrix of parameters, where there
+%   are K output factors and n features.
 
+%   dim(y) = [K m]
+%   dim(theta) = [K*n 1] -> [K n]
+%   dim(X) = [m n]
+%   dim(grad) = [K*n 1] <- first computed as [K n] then reshaped
 
+    K = length(theta)/size(X,2);
+    n = size(X, 2);
 
-
-
-
-
-
+    theta = reshape(theta, K, n);
+    J = -1/m*sum(sum(y.*log(sigmoid(theta*X')) + ...
+        (1-y).*log(1-sigmoid(theta*X')))) + ...
+        lambda/(2*m)*sum(sum([zeros(K,1) theta(:,2:end)].*theta));
+  
+    grad = 1/m*(sigmoid(theta*X')-y)*X+lambda/(2*m)*[zeros(K,1) theta(:, 2:end)];
+    grad = grad(:);
 
 % =============================================================
 
