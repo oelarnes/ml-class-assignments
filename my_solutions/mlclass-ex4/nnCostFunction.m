@@ -16,11 +16,14 @@ function [J grad] = nnCostFunction(nn_params, ...
 
 % Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
 % for our 2 layer neural network
+
+% I reversed the dimensions of theta to match my calculations
+
 Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
-                 hidden_layer_size, (input_layer_size + 1));
+                 hidden_layer_size, input_layer_size + 1)';
 
 Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
-                 num_labels, (hidden_layer_size + 1));
+                 num_labels, hidden_layer_size + 1)';
 
 % Setup some useful variables
 m = size(X, 1);
@@ -60,32 +63,36 @@ Theta2_grad = zeros(size(Theta2));
 %               backpropagation. That is, you can compute the gradients for
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
-%
 
+Y = [y==[1:num_labels]];
 
+function A = add_bias(A0)
+    A = [ones(size(A0,1),1) A0];
+end
 
+function T = remove_bias(T0)
+    T = [zeros(1,size(T0,2)); T0(2:end,:)];
+end
 
+z1 = add_bias(X)*Theta1;
+z2 = add_bias(sigmoid(z1))*Theta2;
 
+hyp = sigmoid(z2);
 
+J = -1/m*sum(sum(Y.*log(hyp) + (1 - Y).*log(1-hyp))) + ...
+lambda/(2*m)*(sum(sum(remove_bias(Theta1).*remove_bias(Theta1))) + ...
+    sum(sum(remove_bias(Theta2).*remove_bias(Theta2))));
 
-
-
-
-
-
-
-
-
-
-
-
+del2 = -1/m*(Y - hyp);
+Theta2_grad = add_bias(sigmoid(z1))'*del2 + lambda/m*remove_bias(Theta2);
+del1 = sigmoid(z1).*(1-sigmoid(z1)).*(del2*Theta2(2:end,:)');
+Theta1_grad = add_bias(X)'*del1 + lambda/m*remove_bias(Theta1);
 
 % -------------------------------------------------------------
 
 % =========================================================================
 
-% Unroll gradients
-grad = [Theta1_grad(:) ; Theta2_grad(:)];
-
+% Unroll gradients, undo reversal of dimensions.
+grad = [Theta1_grad'(:) ; Theta2_grad'(:)];
 
 end
