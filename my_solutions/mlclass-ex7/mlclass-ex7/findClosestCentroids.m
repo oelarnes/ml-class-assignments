@@ -21,11 +21,18 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
+% idea: compute m x K matrix of square distances, then return the index of minimal value
+% in each row.
 
+m = size(X, 1);
 
+sq_dist = zeros(m, K);
 
+for i = [1:K]
+    sq_dist(:,i) = sum((X - centroids(i, :)).^2, 2);
+end
 
-
+[C,idx] = min(sq_dist, [], 2);
 
 % =============================================================
 
